@@ -13,6 +13,8 @@
 
 namespace Tungsten {
 
+    using std::sqrt;
+
 template<typename ElementType, unsigned Size>
 class Vec {
 protected:
@@ -134,7 +136,7 @@ public:
 
     ElementType length() const
     {
-        return std::sqrt(lengthSq());
+        return sqrt(lengthSq());
     }
 
     ElementType sum() const
@@ -155,6 +157,14 @@ public:
         ElementType result(_v[0]);
         for (unsigned i = 1; i < Size; ++i)
             result *= _v[i];
+        return result;
+    }
+
+    Vec cwiseProduct(const Vec& other) const
+    {
+        Vec result;
+        for (unsigned i = 0; i < Size; ++i)
+            result[i] = _v[i] * other[i];
         return result;
     }
 

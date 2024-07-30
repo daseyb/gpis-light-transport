@@ -15,16 +15,16 @@ class ColorPickButton : public QPushButton
 
     QColor toQColor() const;
 
-private slots:
+private Q_SLOTS:
     void pickColor();
 
 public:
     ColorPickButton(Vec3f color, QWidget *parent = nullptr);
 
-public slots:
+public Q_SLOTS:
     void changeColor(Vec3f color);
 
-signals:
+Q_SIGNALS:
     void colorChanged(Vec3f color);
 };
 

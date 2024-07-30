@@ -23,7 +23,7 @@ class PrimitiveProperties : public QWidget
 public:
     PrimitiveProperties(QWidget *proxyParent, Scene *scene, std::unordered_set<Primitive *> &selection);
 
-signals:
+Q_SIGNALS:
     void primitiveNameChange(Primitive *p);
     void triggerRedraw();
 };

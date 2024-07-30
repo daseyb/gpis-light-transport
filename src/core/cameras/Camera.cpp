@@ -23,6 +23,8 @@ Camera::Camera(const Mat4f &transform, const Vec2u &res)
   _transform(transform),
   _res(res)
 {
+    _rect = Box2u({ 0,0 }, _res);
+
     _colorBufferSettings.setType(OutputColor);
 
     _pos    = _transform*Vec3f(0.0f, 0.0f, 2.0f);
@@ -45,6 +47,10 @@ void Camera::fromJson(JsonPtr value, const Scene &scene)
 {
     _tonemapOp = value["tonemap"];
     value.getField("resolution", _res);
+
+    _rect = Box2u({ 0,0 }, _res);
+    value.getField("sub_rect_min", _rect.min());
+    value.getField("sub_rect_max", _rect.max());
 
     if (auto medium = value["medium"])
         _medium = scene.fetchMedium(medium);
@@ -79,6 +85,15 @@ rapidjson::Value Camera::toJson(Allocator &allocator) const
             "up", _up
         }
     };
+
+    if (_rect.min() != Vec2u(0.)) {
+        result.add("sub_rect_min", _rect.min());
+    }
+
+    if (_rect.max() != _res) {
+        result.add("sub_rect_max", _rect.max());
+    }
+
     if (_medium)
         result.add("medium", *_medium);
 

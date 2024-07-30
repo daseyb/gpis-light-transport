@@ -128,7 +128,7 @@ void PropertyWindow::treeSelectionChanged()
 
     rebuildTabs();
 
-    emit selectionChanged();
+    Q_EMIT selectionChanged();
 }
 
 void PropertyWindow::primitiveListChanged()

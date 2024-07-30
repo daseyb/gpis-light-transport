@@ -27,7 +27,7 @@ class VectorProperty : public Property
     QLineEdit *_lineEdits[3];
     ColorPickButton *_colorPicker;
 
-private slots:
+private Q_SLOTS:
     void changeRgb(Vec3f color);
     void changeRgb();
 
@@ -37,7 +37,7 @@ public:
 
     virtual void setVisible(bool visible) override;
 
-public slots:
+public Q_SLOTS:
     void setValue(Vec3f color);
 };
 

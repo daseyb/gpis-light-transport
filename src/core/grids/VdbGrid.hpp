@@ -8,6 +8,7 @@
 #include "io/FileUtils.hpp"
 
 #include <openvdb/openvdb.h>
+#include <openvdb/tools/MultiResGrid.h>
 
 namespace Tungsten {
 
@@ -31,21 +32,39 @@ class VdbGrid : public Grid
     typedef openvdb::Grid<Vec2fTree> Vec2fGrid;
 
     PathPtr _path;
-    std::string _gridName;
+    std::string _densityName;
+    std::string _emissionName;
     std::string _integrationString;
     std::string _sampleString;
     float _stepSize;
+    float _densityScale;
+    float _emissionScale;
+    bool _scaleEmissionByDensity;
+    bool _normalizeSize;
     int _supergridSubsample;
     Mat4f _configTransform;
     Mat4f _invConfigTransform;
 
+    Vec3f _emissionIndexOffset;
+
+    InterpolateMethod _interpolateMethod = InterpolateMethod::Linear;
+
     IntegrationMethod _integrationMethod;
     SampleMethod _sampleMethod;
-    openvdb::FloatGrid::Ptr _grid;
+    openvdb::FloatGrid::Ptr _densityGrid, _detailGrid;
+    openvdb::tools::MultiResGrid<openvdb::FloatTree>::Ptr _mResSDF;
+
+    openvdb::Vec3fGrid::Ptr _emissionGrid;
+    openvdb::FloatGrid::Ptr _tempGrid;
+    openvdb::Vec3fGrid::Ptr _gradientGrid;
     Vec2fGrid::Ptr _superGrid;
     Mat4f _transform;
     Mat4f _invTransform;
     Box3f _bounds;
+    bool _requestGradient = false;
+    bool _requestSDF = false;
+    float _backgroundValue = NAN;
+    
 
     static std::string sampleMethodToString(SampleMethod method);
     static std::string integrationMethodToString(IntegrationMethod method);
@@ -67,10 +86,14 @@ public:
     virtual Mat4f invNaturalTransform() const override;
     virtual Box3f bounds() const override;
 
+    virtual void requestGradient() override;
+    virtual void requestSDF() override;
+
     float density(Vec3f p) const override;
-    Vec3f transmittance(PathSampleGenerator &sampler, Vec3f p, Vec3f w, float t0, float t1, Vec3f sigmaT) const override;
-    Vec2f inverseOpticalDepth(PathSampleGenerator &sampler, Vec3f p, Vec3f w, float t0, float t1,
-            float sigmaT, float xi) const override;
+    Vec3f gradient(Vec3f p) const override;
+    Vec3f emission(Vec3f p) const override;
+    float opticalDepth(PathSampleGenerator &sampler, Vec3f p, Vec3f w, float t0, float t1) const override;
+    Vec2f inverseOpticalDepth(PathSampleGenerator &sampler, Vec3f p, Vec3f w, float t0, float t1, float tau) const override;
 };
 
 }

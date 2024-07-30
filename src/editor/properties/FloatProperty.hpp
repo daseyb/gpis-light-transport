@@ -22,7 +22,7 @@ class FloatProperty : public Property
     QLabel *_nameLabel;
     QLineEdit *_lineEdit;
 
-private slots:
+private Q_SLOTS:
     void textEdited();
 
 public:

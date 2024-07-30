@@ -11,6 +11,7 @@
 #include "integrators/IntegratorFactory.hpp"
 
 #include "primitives/PrimitiveFactory.hpp"
+#include "primitives/Primitive.hpp"
 
 #include "textures/TextureFactory.hpp"
 #include "textures/BitmapTexture.hpp"
@@ -25,9 +26,12 @@
 
 #include "grids/GridFactory.hpp"
 
+#include "math/GaussianProcess.hpp"
+
 #include <tinyformat/tinyformat.hpp>
 #include <rapidjson/document.h>
 #include <functional>
+
 
 namespace Tungsten {
 
@@ -91,6 +95,11 @@ std::shared_ptr<T> fetchObject(const std::vector<std::shared_ptr<T>> &list, cons
     }
 }
 
+std::shared_ptr<Transmittance> Scene::fetchTransmittance(JsonPtr value) const
+{
+    return instantiate<Transmittance>(value, *this);
+}
+
 std::shared_ptr<PhaseFunction> Scene::fetchPhase(JsonPtr value) const
 {
     return instantiate<PhaseFunction>(value, *this);
@@ -103,7 +112,40 @@ std::shared_ptr<Medium> Scene::fetchMedium(JsonPtr value) const
 
 std::shared_ptr<Grid> Scene::fetchGrid(JsonPtr value) const
 {
-    return instantiate<Grid>(value, *this);
+    return fetchObject(_grids, *this, value);
+}
+
+std::shared_ptr<ProceduralScalar> Scene::fetchProceduralScalar(JsonPtr value) const
+{
+    return instantiate<ProceduralScalar>(value, *this);
+}
+
+
+std::shared_ptr<ProceduralVector> Scene::fetchProceduralVector(JsonPtr value) const
+{
+    return instantiate<ProceduralVector>(value, *this);
+}
+
+
+
+std::shared_ptr<Primitive> Scene::fetchPrimitive(JsonPtr value) const
+{
+    return instantiate<Primitive>(value, *this);
+}
+
+std::shared_ptr<MeanFunction> Scene::fetchMeanFunction(JsonPtr value) const
+{
+    return instantiate<MeanFunction>(value, *this);
+}
+
+std::shared_ptr<CovarianceFunction> Scene::fetchCovarianceFunction(JsonPtr value) const
+{
+    return instantiate<CovarianceFunction>(value, *this);
+}
+
+std::shared_ptr<GPSampleNode> Scene::fetchGaussianProcess(JsonPtr value) const
+{
+    return instantiate<GPSampleNode>(value, *this);
 }
 
 std::shared_ptr<Bsdf> Scene::fetchBsdf(JsonPtr value) const
@@ -226,12 +268,15 @@ void Scene::fromJson(JsonPtr value, const Scene &scene)
 {
     JsonSerializable::fromJson(value, scene);
 
-    if (auto media = value["media"])
-        for (unsigned i = 0; i < media.size(); ++i)
-            _media.emplace_back(instantiate<Medium>(media[i], *this));
     if (auto bsdfs = value["bsdfs"])
         for (unsigned i = 0; i < bsdfs.size(); ++i)
             _bsdfs.emplace_back(instantiate<Bsdf>(bsdfs[i], *this));
+    if (auto grids = value["grids"])
+        for (unsigned i = 0; i < grids.size(); ++i)
+            _grids.emplace_back(instantiate<Grid>(grids[i], *this));
+    if (auto media = value["media"])
+        for (unsigned i = 0; i < media.size(); ++i)
+            _media.emplace_back(instantiate<Medium>(media[i], *this));
     if (auto primitives = value["primitives"])
         for (unsigned i = 0; i < primitives.size(); ++i)
             _primitives.emplace_back(instantiate<Primitive>(primitives[i], *this));
@@ -364,11 +409,11 @@ TraceableScene *Scene::makeTraceable(uint32 seed)
     return new TraceableScene(*_camera, *_integrator, _primitives, _bsdfs, _media, _rendererSettings, seed);
 }
 
-Scene *Scene::load(const Path &path, std::shared_ptr<TextureCache> cache)
+Scene *Scene::load(const Path &path, std::shared_ptr<TextureCache> cache, const Path *inputDirectory)
 {
     JsonDocument document(path);
 
-    DirectoryChange context(path.parent());
+    DirectoryChange context(inputDirectory ? *inputDirectory : path.parent());
     if (!cache)
         cache = std::make_shared<TextureCache>();
 

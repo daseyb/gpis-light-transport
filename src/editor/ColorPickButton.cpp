@@ -37,7 +37,7 @@ void ColorPickButton::pickColor()
         _color.z() = color.blueF();
 
         changeColor(_color);
-        emit colorChanged(_color);
+        Q_EMIT colorChanged(_color);
     }
 }
 

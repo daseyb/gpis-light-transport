@@ -84,7 +84,7 @@ void MainWindow::newScene()
     _selection.clear();
     _scene.reset(new Scene());
     _scene->setCamera(new PinholeCamera());
-    emit sceneChanged();
+    Q_EMIT sceneChanged();
 }
 
 void MainWindow::openScene()
@@ -124,7 +124,7 @@ void MainWindow::openScene(const QString &path)
         _selection.clear();
         _scene.reset(newScene);
         _scene->loadResources();
-        emit sceneChanged();
+        Q_EMIT sceneChanged();
     }
 }
 
@@ -132,7 +132,7 @@ void MainWindow::closeScene()
 {
     _selection.clear();
     _scene.reset();
-    emit sceneChanged();
+    Q_EMIT sceneChanged();
 }
 
 void MainWindow::saveScene()

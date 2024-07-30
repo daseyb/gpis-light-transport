@@ -23,12 +23,12 @@ rapidjson::Value RayleighPhaseFunction::toJson(Allocator &allocator) const
     };
 }
 
-Vec3f RayleighPhaseFunction::eval(const Vec3f &wi, const Vec3f &wo) const
+Vec3f RayleighPhaseFunction::eval(const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     return Vec3f(rayleigh(wi.dot(wo)));
 }
 
-bool RayleighPhaseFunction::sample(PathSampleGenerator &sampler, const Vec3f &wi, PhaseSample &sample) const
+bool RayleighPhaseFunction::sample(PathSampleGenerator &sampler, const Vec3f &wi, const MediumSample& /*mediumSample*/, PhaseSample &sample) const
 {
     Vec2f xi = sampler.next2D();
     float phi = xi.x()*TWO_PI;
@@ -48,7 +48,7 @@ bool RayleighPhaseFunction::sample(PathSampleGenerator &sampler, const Vec3f &wi
     return true;
 }
 
-bool RayleighPhaseFunction::invert(WritablePathSampleGenerator &sampler, const Vec3f &wi, const Vec3f &wo) const
+bool RayleighPhaseFunction::invert(WritablePathSampleGenerator &sampler, const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     Vec3f w = TangentFrame(wi).toLocal(wo);
     float cosTheta = w.z();
@@ -63,7 +63,7 @@ bool RayleighPhaseFunction::invert(WritablePathSampleGenerator &sampler, const V
     return true;
 }
 
-float RayleighPhaseFunction::pdf(const Vec3f &wi, const Vec3f &wo) const
+float RayleighPhaseFunction::pdf(const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     return rayleigh(wi.dot(wo));
 }

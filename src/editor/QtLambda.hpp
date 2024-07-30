@@ -15,7 +15,7 @@ class QtLambda: public QObject
 public:
     QtLambda(QObject *parent, std::function<void()> slot);
 
-public slots:
+public Q_SLOTS:
     void call();
 };
 

@@ -129,10 +129,10 @@ bool PathVertex::sampleNextVertex(const TraceableScene &scene, TraceBase &tracer
     } case MediumVertex: {
         MediumRecord &record = _record.medium;
 
-        if (!record.mediumSample.phase->sample(state.sampler, state.ray.dir(), record.phaseSample))
+        if (!record.mediumSample.phase->sample(state.sampler, state.ray.dir(), record.mediumSample, record.phaseSample))
             return false;
 
-        prev->_pdfBackward = record.mediumSample.phase->pdf(-record.phaseSample.w, -state.ray.dir());
+        prev->_pdfBackward = record.mediumSample.phase->pdf(-record.phaseSample.w, -state.ray.dir(), record.mediumSample);
 
         state.ray = state.ray.scatter(record.mediumSample.p, record.phaseSample.w, 0.0f);
         state.ray.setPrimaryRay(false);
@@ -160,7 +160,7 @@ bool PathVertex::sampleNextVertex(const TraceableScene &scene, TraceBase &tracer
         hitSurface = mediumRecord.mediumSample.exited;
         edgePdfForward = mediumRecord.mediumSample.pdf;
         Ray reverseRay(mediumRecord.mediumSample.p, -state.ray.dir(), 0.0f, mediumRecord.mediumSample.t);
-        edgePdfBackward = state.medium->pdf(state.sampler, reverseRay, onSurface());
+        edgePdfBackward = state.medium->pdf(state.sampler, reverseRay, hitSurface, onSurface());
         weight *= mediumRecord.mediumSample.weight;
         if (hitSurface && !didHit)
             return false;
@@ -263,7 +263,7 @@ bool PathVertex::invertVertex(WritablePathSampleGenerator &sampler, const PathEd
             return _sampler.bsdf->invert(sampler, _record.surface.event.makeWarpedQuery(wi, wo));
         }
     } case MediumVertex: {
-        return _sampler.phase->invert(sampler, prevEdge->d, nextEdge.d);
+        return _sampler.phase->invert(sampler, prevEdge->d, nextEdge.d, _record.medium.mediumSample);
     } default:
         return false;
     }
@@ -286,7 +286,7 @@ Vec3f PathVertex::eval(const Vec3f &d, bool adjoint) const
                 _record.surface.event.frame.toLocal(d)),
                 adjoint);
     case MediumVertex:
-        return _sampler.phase->eval(_record.medium.wi, d);
+        return _sampler.phase->eval(_record.medium.wi, d, _record.medium.mediumSample);
     default:
         return Vec3f(0.0f);
     }
@@ -319,12 +319,20 @@ void PathVertex::evalPdfs(const PathVertex *prev, const PathEdge *prevEdge, cons
         if (!prev->isInfiniteEmitter()) *backward *= prev->cosineFactor(prevEdge->d)/prevEdge->rSq;
         break;
     } case MediumVertex: {
-        *forward  = nextEdge .pdfForward *_sampler.phase->pdf(prevEdge->d,   nextEdge.d);
-        *backward = prevEdge->pdfBackward*_sampler.phase->pdf(-nextEdge.d, -prevEdge->d);
+        *forward  = nextEdge .pdfForward *_sampler.phase->pdf(prevEdge->d,   nextEdge.d, _record.medium.mediumSample);
+        *backward = prevEdge->pdfBackward*_sampler.phase->pdf(-nextEdge.d, -prevEdge->d, _record.medium.mediumSample);
         if (!next .isInfiniteEmitter()) *forward  *= next .cosineFactor(nextEdge .d)/nextEdge .rSq;
         if (!prev->isInfiniteEmitter()) *backward *= prev->cosineFactor(prevEdge->d)/prevEdge->rSq;
         break;
     }}
+}
+
+bool PathVertex::segmentConnectable(const PathVertex &next) const
+{
+    if (onSurface() || next.onSurface())
+        return true;
+
+    return !_medium->isDirac();
 }
 
 void PathVertex::pointerFixup()

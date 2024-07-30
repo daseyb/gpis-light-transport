@@ -24,7 +24,7 @@ public:
 
     virtual void setVisible(bool visible) override;
 
-public slots:
+public Q_SLOTS:
     void stateChanged(int state);
 };
 

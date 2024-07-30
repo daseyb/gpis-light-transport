@@ -35,7 +35,7 @@ template<unsigned Size>
 Vec<float, Size> ObjLoader::loadVector(const char *s)
 {
     std::istringstream ss(s);
-    Vec<float, Size> result;
+    Vec<float, Size> result(0.f);
     for (unsigned i = 0; i < Size && !ss.eof() && !ss.fail(); ++i)
         ss >> result[i];
     return result;
@@ -69,11 +69,13 @@ uint32 ObjLoader::fetchVertex(int32 pos, int32 normal, int32 uv)
     if (iter != _indices.end()) {
         return iter->second;
     } else {
-        Vec3f p(0.0f), n(0.0f, 1.0f, 0.0f);
+        Vec3f p(0.0f), n(0.0f, 1.0f, 0.0f), c(1.f);
         Vec2f u(0.0f);
 
-        if (pos)
+        if (pos) {
             p = _pos[pos - 1];
+            c = _color[pos - 1];
+        }
         if (normal)
             n = _normal[normal - 1];
         if (uv)
@@ -82,7 +84,7 @@ uint32 ObjLoader::fetchVertex(int32 pos, int32 normal, int32 uv)
         _bounds.grow(p);
 
         uint32 index = _verts.size();
-        _verts.emplace_back(p, n, u);
+        _verts.emplace_back(p, n, u, c);
 
         _indices.insert(std::make_pair(Vec3i(pos, normal, uv), index));
         return index;
@@ -223,8 +225,11 @@ void ObjLoader::loadLine(const char *line)
     }
 
     skipWhitespace(line);
-    if (hasPrefix(line, "v"))
-        _pos.push_back(loadVector<3>(line + 2));
+    if (hasPrefix(line, "v")) {
+        auto posAndColor = loadVector<6>(line + 2);
+        _pos.push_back({ posAndColor[0], posAndColor[1], posAndColor[2] });
+        _color.push_back({ posAndColor[3], posAndColor[4], posAndColor[5]});
+    }
     else if (hasPrefix(line, "vn"))
         _normal.push_back(loadVector<3>(line + 3));
     else if (hasPrefix(line, "vt"))

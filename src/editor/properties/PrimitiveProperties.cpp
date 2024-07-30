@@ -10,13 +10,13 @@ void PrimitiveProperties::fillPropertySheet(PropertyForm *sheet, Primitive *p)
 {
     sheet->addStringProperty(p->name(), "Name", [this, p](const std::string &s) {
         p->setName(s);
-        emit primitiveNameChange(p);
+        Q_EMIT primitiveNameChange(p);
         return true;
     });
     sheet->addTextureProperty(p->emission(), "Emission", true, _scene, TexelConversion::REQUEST_RGB, false,
         [this, p](std::shared_ptr<Texture> &tex) {
             p->setEmission(tex);
-            emit triggerRedraw();
+            Q_EMIT triggerRedraw();
             return true;
     });
     sheet->addMediumProperty(p->intMedium(), "Interior medium", _scene, [this, p](std::shared_ptr<Medium> &m) {

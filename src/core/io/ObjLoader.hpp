@@ -42,6 +42,7 @@ class ObjLoader
     std::vector<Vec3f> _pos;
     std::vector<Vec3f> _normal;
     std::vector<Vec2f> _uv;
+    std::vector<Vec3f> _color;
 
     std::string _meshName;
     bool _meshSmoothed;

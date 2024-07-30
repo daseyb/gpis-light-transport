@@ -153,6 +153,10 @@ typedef Box<Vec4fp, float, 4> Box4fp;
 typedef Box<Vec3fp, float, 3> Box3fp;
 typedef Box<Vec2fp, float, 2> Box2fp;
 
+typedef Box<Vec4d, double, 4> Box4d;
+typedef Box<Vec3d, double, 3> Box3d;
+typedef Box<Vec2d, double, 2> Box2d;
+
 inline Box3fp expand(const Box3f &b)
 {
     return Box3fp(expand(b.min()), expand(b.max()));

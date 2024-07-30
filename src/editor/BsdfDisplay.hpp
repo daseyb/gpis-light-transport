@@ -37,17 +37,17 @@ class BsdfDisplay : public QLabel
 
     void rebuildImage();
 
-private slots:
+private Q_SLOTS:
     void finishRender();
 
 public:
     BsdfDisplay(int w, int h, QWidget *parent = nullptr);
     ~BsdfDisplay();
 
-public slots:
+public Q_SLOTS:
     void changeBsdf(std::shared_ptr<Bsdf> &bsdf);
 
-signals:
+Q_SIGNALS:
     void rendererFinished();
 };
 

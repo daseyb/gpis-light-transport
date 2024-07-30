@@ -53,7 +53,7 @@ bool saveObj(const Path &path, const std::vector<Vertex> &verts, const std::vect
         return false;
 
     for (const Vertex &v : verts)
-        tfm::format(*stream, "v %f %f %f\n", v.pos().x(), v.pos().y(), v.pos().z());
+        tfm::format(*stream, "v %f %f %f %f %f %f\n", v.pos().x(), v.pos().y(), v.pos().z(), v.color().x(), v.color().y(), v.color().z());
     for (const Vertex &v : verts)
         tfm::format(*stream, "vn %f %f %f\n", v.normal().x(), v.normal().y(), v.normal().z());
     for (const Vertex &v : verts)

@@ -86,21 +86,21 @@ public:
         return _deltaTransform;
     }
 
-signals:
+Q_SIGNALS:
     void transformFinished(Mat4f delta);
     void redraw();
 
-public slots:
+public Q_SLOTS:
     void setMode(int mode)
     {
         _mode = TransformMode(mode);
-        emit redraw();
+        Q_EMIT redraw();
     }
 
     void toggleTranslateLocal()
     {
         _translateLocal = !_translateLocal;
-        emit redraw();
+        Q_EMIT redraw();
     }
 
     void resize(int w, int h)
@@ -113,7 +113,7 @@ public slots:
     {
         _fixedAxis = axis;
         updateTransform(_currentX, _currentY);
-        emit redraw();
+        Q_EMIT redraw();
     }
 
     void setView(const Mat4f &m)
@@ -142,7 +142,7 @@ public slots:
         _snapToGrid = v;
         if (_transforming) {
             updateTransform(_currentX, _currentY);
-            emit redraw();
+            Q_EMIT redraw();
         }
     }
 

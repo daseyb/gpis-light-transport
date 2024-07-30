@@ -32,8 +32,7 @@ class PathTraceIntegrator : public Integrator
 
     std::shared_ptr<TaskGroup> _group;
 
-    uint32 _w;
-    uint32 _h;
+    Box2u _rect;
     uint32 _varianceW;
     uint32 _varianceH;
 

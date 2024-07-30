@@ -1,4 +1,4 @@
-![Tungsten Sample Render](https://raw.githubusercontent.com/tunabrain/tungsten/master/Header.jpg "Tungsten Sample Render")
+![Tungsten Sample Render](https://raw.githubusercontent.com/daseyb/gpis-light-transport/main/Header.jpg "Tungsten Sample Render")
 
 # The Tungsten Renderer #
 

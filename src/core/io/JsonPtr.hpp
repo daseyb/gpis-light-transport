@@ -8,6 +8,7 @@
 
 #include <rapidjson/document.h>
 #include <tinyformat/tinyformat.hpp>
+#include <vector>
 
 namespace Tungsten {
 
@@ -39,6 +40,7 @@ public:
     void get(bool &dst) const;
     void get(float &dst) const;
     void get(double &dst) const;
+    void get(uint8 &dst) const;
     void get(uint32 &dst) const;
     void get(int32 &dst) const;
     void get(uint64 &dst) const;
@@ -59,6 +61,20 @@ public:
                         "(need %d elements, received %d)", Size, Size, size()));
 
             for (unsigned i = 0; i < Size; ++i)
+                dst[i] = (*this)[i].cast<ElementType>();
+        }
+    }
+
+    template<typename ElementType>
+    void get(std::vector<ElementType>& dst) const
+    {
+        if (!_value->IsArray()) {
+            dst = std::vector<ElementType>();
+            dst.emplace_back(cast<ElementType>());
+        }
+        else {
+            dst.resize(size());
+            for (unsigned i = 0; i < size(); ++i)
                 dst[i] = (*this)[i].cast<ElementType>();
         }
     }

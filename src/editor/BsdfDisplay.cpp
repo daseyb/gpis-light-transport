@@ -107,7 +107,7 @@ void BsdfDisplay::finishRender()
     if (_flattenedScene->integrator().done())
         _flattenedScene.reset();
     else
-        _flattenedScene->integrator().startRender([&]() { emit rendererFinished(); });
+        _flattenedScene->integrator().startRender([&]() { Q_EMIT rendererFinished(); });
 }
 
 void BsdfDisplay::changeBsdf(std::shared_ptr<Bsdf> &bsdf)
@@ -131,7 +131,7 @@ void BsdfDisplay::changeBsdf(std::shared_ptr<Bsdf> &bsdf)
     _scene->loadResources();
     _flattenedScene.reset(_scene->makeTraceable());
 
-    _flattenedScene->integrator().startRender([&]() { emit rendererFinished(); });
+    _flattenedScene->integrator().startRender([&]() { Q_EMIT rendererFinished(); });
 }
 
 }

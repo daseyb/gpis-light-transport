@@ -118,7 +118,7 @@ class PreviewWindow : public QGLWidget
     void drawBackgroundGradient();
     void drawGrid();
 
-private slots:
+private Q_SLOTS:
     void toggleSelectAll();
     void grabGizmo();
     void transformFinished(Mat4f delta);
@@ -145,11 +145,11 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void keyReleaseEvent(QKeyEvent *event);
 
-public slots:
+public Q_SLOTS:
     void sceneChanged();
     void changeSelection();
 
-signals:
+Q_SIGNALS:
     void selectionChanged();
     void primitiveListChanged();
 

@@ -21,7 +21,7 @@ public:
     SimdFloat() = default;
     SimdFloat(const SimdFloat &o) = default;
     SimdFloat(const float *a);
-    SimdFloat(float a);
+    explicit SimdFloat(float a);
 
     SimdFloat operator-() const;
     SimdFloat operator+(const SimdFloat &o) const;
@@ -71,19 +71,19 @@ public:
     : _a(*a)
     {
     }
-    SimdFloat(float a)
+    explicit SimdFloat(float a)
     : _a(a)
     {
     }
 
-    inline SimdFloat operator-() const { return -_a; }
-    inline SimdFloat operator+(const SimdFloat &o) const { return _a + o._a; }
-    inline SimdFloat operator-(const SimdFloat &o) const { return _a - o._a; }
-    inline SimdFloat operator*(const SimdFloat &o) const { return _a * o._a; }
-    inline SimdFloat operator/(const SimdFloat &o) const { return _a / o._a; }
+    inline SimdFloat operator-() const { return -SimdFloat(_a); }
+    inline SimdFloat operator+(const SimdFloat &o) const { return SimdFloat(_a + o._a); }
+    inline SimdFloat operator-(const SimdFloat &o) const { return SimdFloat(_a - o._a); }
+    inline SimdFloat operator*(const SimdFloat &o) const { return SimdFloat(_a * o._a); }
+    inline SimdFloat operator/(const SimdFloat &o) const { return SimdFloat(_a / o._a); }
 
-    inline SimdFloat operator&(const SimdBool<1> &o) const { return o.any() ? _a : 0.0f; }
-    SimdFloat blend(const SimdFloat &o, const SimdBool<1> &mask) const { return mask.any() ? o._a : _a; }
+    inline SimdFloat operator&(const SimdBool<1> &o) const { return SimdFloat(o.any() ? _a : 0.0f); }
+    SimdFloat blend(const SimdFloat &o, const SimdBool<1> &mask) const { return SimdFloat(mask.any() ? o._a : _a); }
 
     inline SimdFloat &operator+=(const SimdFloat &o) { _a += o._a; return *this; }
     inline SimdFloat &operator-=(const SimdFloat &o) { _a -= o._a; return *this; }
@@ -129,7 +129,7 @@ public:
     : _a(_mm_load_ps(a))
     {
     }
-    SimdFloat(float a)
+    explicit SimdFloat(float a)
     : _a(_mm_set1_ps(a))
     {
     }
@@ -225,7 +225,7 @@ public:
     : _a(_mm256_load_ps(a))
     {
     }
-    SimdFloat(float a)
+    explicit SimdFloat(float a)
     : _a(_mm256_set1_ps(a))
     {
     }

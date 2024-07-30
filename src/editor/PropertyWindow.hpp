@@ -40,17 +40,17 @@ class PropertyWindow : public QSplitter
 public:
     PropertyWindow(QWidget *proxyParent, MainWindow *parent);
 
-private slots:
+private Q_SLOTS:
     void treeSelectionChanged();
     void primitiveListChanged();
     void tabChanged(int idx);
 
-public slots:
+public Q_SLOTS:
     void sceneChanged();
     void changeSelection();
     void changePrimitiveName(Primitive *p);
 
-signals:
+Q_SIGNALS:
     void selectionChanged();
 };
 

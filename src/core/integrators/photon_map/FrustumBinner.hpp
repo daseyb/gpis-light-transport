@@ -78,8 +78,8 @@ public:
         for (auto &q : quads) {
             q.start(minX + TileSize*0.5f, minY + TileSize*0.5f);
             for (int k = 0; k < 3; ++k) {
-                q.stepX[k] *= float(TileSize);
-                q.stepY[k] *= float(TileSize);
+                q.stepX[k] *= decltype(q.stepX[k])(TileSize);
+                q.stepY[k] *= decltype(q.stepY[k])(TileSize);
             }
         }
 

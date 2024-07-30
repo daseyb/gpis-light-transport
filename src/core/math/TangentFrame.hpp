@@ -8,6 +8,58 @@
 
 namespace Tungsten {
 
+template<typename Mat, typename Vec>
+struct TangentFrameD
+{
+    Vec normal, tangent, bitangent;
+
+    TangentFrameD() = default;
+
+    TangentFrameD(const Vec& n, const Vec& t, const Vec& b)
+        : normal(n), tangent(t), bitangent(b)
+    {
+    }
+
+    template<typename ElT>
+    auto signf(ElT v) {
+        return v < 0 ? -1. : 1.;
+    }
+
+    TangentFrameD(const Vec& n)
+        : normal(n)
+    {
+        // [Duff et al. 17] Building An Orthonormal Basis, Revisited. JCGT. 2017.
+        auto sign = signf(normal.z());
+        auto a = -1.0f / (sign + normal.z());
+        auto b = normal.x() * normal.y() * a;
+        tangent = Vec(1.0 + sign * normal.x() * normal.x() * a, sign * b, -sign * normal.x());
+        bitangent = Vec(b, sign + normal.y() * normal.y() * a, -normal.y());
+    }
+
+    Vec toLocal(const Vec& p) const
+    {
+        return Vec(
+            tangent.dot(p),
+            bitangent.dot(p),
+            normal.dot(p)
+        );
+    }
+
+    Vec toGlobal(const Vec& p) const
+    {
+        return tangent * p.x() + bitangent * p.y() + normal * p.z();
+    }
+
+    Mat toMatrix() const
+    {
+        Mat vmat;
+        vmat.col(0) = tangent;
+        vmat.col(1) = bitangent;
+        vmat.col(2) = normal;
+        return vmat;
+    }
+};
+
 struct TangentFrame
 {
     Vec3f normal, tangent, bitangent;
@@ -22,20 +74,12 @@ struct TangentFrame
     TangentFrame(const Vec3f &n)
     : normal(n)
     {
-        // naive method
-        // if (std::abs(normal.x()) > std::abs(normal.y()))
-        //     tangent = Vec3f(0.0f, 1.0f, 0.0f);
-        // else
-        //     tangent = Vec3f(1.0f, 0.0f, 0.0f);
-        // bitangent = normal.cross(tangent).normalized();
-        // tangent = bitangent.cross(normal);
-
         // [Duff et al. 17] Building An Orthonormal Basis, Revisited. JCGT. 2017.
         float sign = copysignf(1.0f, normal.z());
-        const float a = -1.0f / (sign + normal.z());
-        const float b = normal.x() * normal.y() * a;
-        tangent = Vec3f(1.0f + sign * normal.x() * normal.x() * a, sign * b, -sign * normal.x());
-        bitangent = Vec3f(b, sign + normal.y() * normal.y() * a, -normal.y());
+        const float a = -1.0f/(sign + normal.z());
+        const float b = normal.x()*normal.y()*a;
+        tangent = Vec3f(1.0f + sign*normal.x()*normal.x()*a, sign*b, -sign*normal.x());
+        bitangent = Vec3f(b, sign + normal.y()*normal.y()*a, -normal.y());
     }
 
     Vec3f toLocal(const Vec3f &p) const
@@ -57,6 +101,7 @@ struct TangentFrame
         return Mat4f(tangent, bitangent, normal);
     }
 };
+
 
 }
 

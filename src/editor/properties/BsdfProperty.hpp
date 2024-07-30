@@ -113,7 +113,7 @@ class BsdfProperty : public Property
     void buildBsdfPage(PropertyForm *sheet, PhongBsdf *bsdf);
     void buildBsdfPage(PropertyForm *sheet, NullBsdf *bsdf);
 
-private slots:
+private Q_SLOTS:
     void updateBsdfDisplay();
     void pickBsdf(int idx);
     void newBsdf();

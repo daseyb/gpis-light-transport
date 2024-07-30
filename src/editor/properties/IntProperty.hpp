@@ -22,7 +22,7 @@ class IntProperty : public Property
     QLabel *_nameLabel;
     QSpinBox *_spinner;
 
-private slots:
+private Q_SLOTS:
     void setValue(int newValue);
 
 public:

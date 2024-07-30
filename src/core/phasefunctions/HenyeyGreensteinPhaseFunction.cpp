@@ -36,12 +36,12 @@ rapidjson::Value HenyeyGreensteinPhaseFunction::toJson(Allocator &allocator) con
     };
 }
 
-Vec3f HenyeyGreensteinPhaseFunction::eval(const Vec3f &wi, const Vec3f &wo) const
+Vec3f HenyeyGreensteinPhaseFunction::eval(const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     return Vec3f(henyeyGreenstein(wi.dot(wo)));
 }
 
-bool HenyeyGreensteinPhaseFunction::sample(PathSampleGenerator &sampler, const Vec3f &wi, PhaseSample &sample) const
+bool HenyeyGreensteinPhaseFunction::sample(PathSampleGenerator &sampler, const Vec3f &wi, const MediumSample& /*mediumSample*/, PhaseSample &sample) const
 {
     Vec2f xi = sampler.next2D();
     if (_g == 0.0f) {
@@ -63,7 +63,7 @@ bool HenyeyGreensteinPhaseFunction::sample(PathSampleGenerator &sampler, const V
     return true;
 }
 
-bool HenyeyGreensteinPhaseFunction::invert(WritablePathSampleGenerator &sampler, const Vec3f &wi, const Vec3f &wo) const
+bool HenyeyGreensteinPhaseFunction::invert(WritablePathSampleGenerator &sampler, const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     if (_g == 0.0f) {
         sampler.put2D(SampleWarp::invertUniformSphere(wo, sampler.untracked1D()));
@@ -79,7 +79,7 @@ bool HenyeyGreensteinPhaseFunction::invert(WritablePathSampleGenerator &sampler,
     return true;
 }
 
-float HenyeyGreensteinPhaseFunction::pdf(const Vec3f &wi, const Vec3f &wo) const
+float HenyeyGreensteinPhaseFunction::pdf(const Vec3f &wi, const Vec3f &wo, const MediumSample& /*mediumSample*/) const
 {
     return henyeyGreenstein(wi.dot(wo));
 }

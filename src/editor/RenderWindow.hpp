@@ -40,7 +40,7 @@ class RenderWindow : public QWidget
 
     void updateStatus();
 
-private slots:
+private Q_SLOTS:
     void startRender();
     void abortRender();
     void finishRender();
@@ -58,10 +58,10 @@ protected:
     virtual void mousePressEvent(QMouseEvent *eventPress);
     virtual void wheelEvent(QWheelEvent *wheelEvent);
 
-public slots:
+public Q_SLOTS:
     void sceneChanged();
 
-signals:
+Q_SIGNALS:
     void rendererFinished();
 
 public:

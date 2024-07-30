@@ -16,8 +16,7 @@ CONSTEXPR uint32 PathTraceIntegrator::AdaptiveThreshold;
 
 PathTraceIntegrator::PathTraceIntegrator()
 : Integrator(),
-  _w(0),
-  _h(0),
+  _rect(Vec2u(), Vec2u()),
   _varianceW(0),
   _varianceH(0),
   _sampler(0xBA5EBA11)
@@ -26,13 +25,13 @@ PathTraceIntegrator::PathTraceIntegrator()
 
 void PathTraceIntegrator::diceTiles()
 {
-    for (uint32 y = 0; y < _h; y += TileSize) {
-        for (uint32 x = 0; x < _w; x += TileSize) {
+    for (uint32 y = _rect.min().y(); y < _rect.max().y(); y += TileSize) {
+        for (uint32 x = _rect.min().x(); x < _rect.max().x(); x += TileSize) {
             _tiles.emplace_back(
                 x,
                 y,
-                min(TileSize, _w - x),
-                min(TileSize, _h - y),
+                min(TileSize, _rect.max().x() - x),
+                min(TileSize, _rect.max().y() - y),
                 _scene->rendererSettings().useSobol() ?
                     std::unique_ptr<PathSampleGenerator>(new SobolPathSampler(MathUtil::hash32(_sampler.nextI()))) :
                     std::unique_ptr<PathSampleGenerator>(new UniformPathSampler(MathUtil::hash32(_sampler.nextI())))
@@ -90,7 +89,7 @@ void PathTraceIntegrator::distributeAdaptiveSamples(int spp)
     for (SampleRecord &record : _samples)
         totalWeight += record.adaptiveWeight;
 
-    int adaptiveBudget = (spp - 1)*_w*_h;
+    int adaptiveBudget = (spp - 1)* _rect.max().x() * _rect.max().y();
     int budgetPerTile = adaptiveBudget/(VarianceTileSize*VarianceTileSize);
     float weightToSampleFactor = double(budgetPerTile)/totalWeight;
 
@@ -139,7 +138,7 @@ void PathTraceIntegrator::renderTile(uint32 id, uint32 tileId)
     for (uint32 y = 0; y < tile.h; ++y) {
         for (uint32 x = 0; x < tile.w; ++x) {
             Vec2u pixel(tile.x + x, tile.y + y);
-            uint32 pixelIndex = pixel.x() + pixel.y()*_w;
+            uint32 pixelIndex = pixel.x() + pixel.y()* _scene->cam().resolution().x();
             uint32 variancePixelIndex = pixel.x()/VarianceTileSize + pixel.y()/VarianceTileSize*_varianceW;
 
             SampleRecord &record = _samples[variancePixelIndex];
@@ -192,10 +191,9 @@ void PathTraceIntegrator::prepareForRender(TraceableScene &scene, uint32 seed)
     for (uint32 i = 0; i < ThreadUtils::pool->threadCount(); ++i)
         _tracers.emplace_back(new PathTracer(&scene, _settings, i));
 
-    _w = scene.cam().resolution().x();
-    _h = scene.cam().resolution().y();
-    _varianceW = (_w + VarianceTileSize - 1)/VarianceTileSize;
-    _varianceH = (_h + VarianceTileSize - 1)/VarianceTileSize;
+    _rect = scene.cam().rect();
+    _varianceW = (scene.cam().resolution().x() + VarianceTileSize - 1)/VarianceTileSize;
+    _varianceH = (scene.cam().resolution().y() + VarianceTileSize - 1)/VarianceTileSize;
     diceTiles();
     _samples.resize(_varianceW*_varianceH);
 }

@@ -101,6 +101,11 @@ static inline float dielectricReflectance(float eta, float cosThetaI)
 // http://www.cs.virginia.edu/~jdl/bib/globillum/shirley_thesis.pdf
 static inline float conductorReflectance(float eta, float k, float cosThetaI)
 {
+    // hack for GP testing!!
+    if (eta == 0 && k == 0) {
+        return 1;
+    }
+
     float cosThetaISq = cosThetaI*cosThetaI;
     float sinThetaISq = max(1.0f - cosThetaISq, 0.0f);
     float sinThetaIQu = sinThetaISq*sinThetaISq;

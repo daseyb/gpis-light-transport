@@ -1,16 +1,16 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.20)
 project(Tungsten)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-include(CXX11)
-check_for_cxx11_compiler(CXX11_COMPILER)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED On)
+set(CMAKE_CXX_EXTENSIONS Off)
 
-if(CXX11_COMPILER)
-    enable_cxx11()
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} seems to have no C++11 support. Please try again with a more recent compiler version.")
-endif()
+# Disable annoying boost warning
+set(Boost_NO_WARN_NEW_VERSIONS 1)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # AVX does not do much benefit at the moment, but breaks compilation on some platforms.
 # Disabled for now until AVX becomes important enough to reconsider.
@@ -44,6 +44,10 @@ if (MSVC)
 else()
     add_definitions(-DCONSTEXPR=constexpr)
 endif()
+
+if (MSVC)
+  add_compile_options(/bigobj)
+endif ()
 
 IF(COMMAND cmake_policy)
   if (POLICY CMP0043)
@@ -81,30 +85,54 @@ add_library(thirdparty STATIC
 		src/thirdparty/skylight/ArHosekSkyModel.cpp
 		src/thirdparty/tribox/tribox.cpp)
 
+add_subdirectory(src/thirdparty/eigen)
+
+set(AUTODIFF_BUILD_TESTS OFF)
+set(AUTODIFF_BUILD_PYTHON OFF)
+set(AUTODIFF_BUILD_EXAMPLES OFF)
+set(AUTODIFF_BUILD_DOCS OFF)
+add_subdirectory(src/thirdparty/autodiff)
+
+add_subdirectory(src/thirdparty/spectra)
+
+
+add_subdirectory(src/thirdparty/libigl)
+
+
 if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CXX_WARNINGS "-Wall -Wextra -Wpointer-arith -Wcast-align -fstrict-aliasing -Wno-unused-local-typedefs -Wno-misleading-indentation -Wno-maybe-uninitialized -Wno-int-in-bool-context -Wno-implicit-fallthrough")
+    set(CXX_WARNINGS "-Wall -Wextra -Wpointer-arith -Wcast-align -fstrict-aliasing -Wno-unused-local-typedefs -Wno-misleading-indentation -Wno-maybe-uninitialized -Wno-int-in-bool-context -Wno-implicit-fallthrough -Wno-class-memaccess -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-parameter -Wno-reorder -Wno-parentheses -Wno-pessimizing-move")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_WARNINGS} -fvisibility-inlines-hidden")
 endif()
-set(core_libs core thirdparty embree)
 
-include_directories(src/core src/thirdparty src/thirdparty/embree/include src)
+set(core_libs core thirdparty embree Eigen3::Eigen autodiff::autodiff Spectra igl::core)
 
-find_package(Eigen3)
-if (EIGEN3_FOUND)
-    include_directories(${EIGEN3_INCLUDE_DIR})
-    message(STATUS "Eigen3 detected. denoiser will be built")
-else()
-    message(STATUS "No Eigen3 detected. denoiser will not be built")
-endif()
+include_directories(
+	src/core src/thirdparty 
+	src/thirdparty/embree/include src 
+	src/thirdparty/eigen/
+	src/thirdparty/autodiff
+	src/thirdparty/spectra/include
+	src/thirdparty/libigl/include
+	src/thirdparty/facet-forge/include
+	${FCPW_EIGEN_INCLUDES})
 
-find_package(OpenEXR)
-if (OPENEXR_FOUND)
+find_package(Imath CONFIG REQUIRED)
+find_package(OpenEXR CONFIG REQUIRED)
+if (OpenEXR_FOUND AND Imath_FOUND)
     message(STATUS "OpenEXR detected. Building with .exr support")
-    add_definitions(-DOPENEXR_AVAILABLE)
-    include_directories(${OPENEXR_INCLUDE_DIR})
-    set(core_libs ${core_libs} ${OPENEXR_LIBRARIES})
+    add_definitions(-DOPENEXR_AVAILABLE -DIMATH_HALF_NO_LOOKUP_TABLE)
+    include_directories(${Imath_INCLUDE_DIRS})
+    set(core_libs ${core_libs} OpenEXR::OpenEXR Imath::Imath Imath::ImathConfig)
 else()
     message(STATUS "No OpenEXR detected. Building without .exr support")
+endif()
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+	set(core_libs ${core_libs} OpenMP::OpenMP_CXX)
+    message("OPENMP FOUND")
+else()
+    message("Missing OPENMP!")
 endif()
 
 find_package(JPEG)
@@ -117,26 +145,48 @@ else()
     message(STATUS "No JPEG library detected. Falling back to stb_image JPG decoder")
 endif()
 
-find_package(OpenVDB)
-find_package(TBB)
-if (OPENEXR_FOUND AND OPENVDB_FOUND AND TBB_FOUND)
+find_package(TBB REQUIRED)
+find_package(OpenVDB REQUIRED)
+if (OpenVDB_FOUND AND OpenEXR_FOUND AND TBB_FOUND)
     message(STATUS "OpenVDB detected. Building with .vdb support")
     add_definitions(-DOPENVDB_AVAILABLE)
     add_definitions(-DOPENVDB_3_ABI_COMPATIBLE)
-    include_directories(${OPENVDB_INCLUDE_DIR})
-    set(core_libs ${core_libs} ${OPENVDB_LIBRARIES} ${TBB_LIBRARIES})
+	add_definitions(-DQT_NO_KEYWORDS)
+    include_directories(${OpenVDB_INCLUDE_DIRS} ${Tbb_INCLUDE_DIRS})
+    set(core_libs ${core_libs} OpenVDB::openvdb TBB::tbb TBB::tbbmalloc)
 else()
-    if (NOT OPENVDB_FOUND)
+    if (NOT OpenVDB_FOUND)
         message(STATUS "No OpenVDB detected. Building without .vdb support")
-    elseif(NOT OPENEXR_FOUND)
+    elseif(NOT OpenEXR_FOUND)
         message(STATUS "No OpenEXR libraries detected. Building without .vdb support")
     else()
         message(STATUS "No TBB detected. Building without .vdb support")
     endif()
 endif()
 
+find_package(FFTW3 CONFIG)
+
+if(FFTW3_FOUND)
+    message(STATUS "FFTW detected. Building with DFT realization generation support")
+	include_directories(${FFTW3_INCLUDE_DIRS})
+	set(core_libs ${core_libs} FFTW3::fftw3)
+	add_definitions(-DFFTW_AVAILABLE)
+endif()
+
+find_package(Ceres CONFIG)
+
+if(Ceres_FOUND)
+    message(STATUS "Ceres detected. Building with covariance fitting support.")
+	include_directories(${Ceres_INCLUDE_DIRS})
+	set(core_libs ${core_libs} Ceres::ceres)
+	add_definitions(-DCERES_AVAILABLE)
+endif()
+
 file(GLOB_RECURSE Core_SOURCES "src/core/*.cpp")
 add_library(core STATIC ${Core_SOURCES})
+
+add_library(facet-forge STATIC src/thirdparty/facet-forge/src/random.cpp)
+set(core_libs ${core_libs} facet-forge)
 
 add_executable(obj2json src/obj2json/obj2json.cpp)
 target_link_libraries(obj2json ${core_libs})
@@ -159,6 +209,22 @@ endif()
 add_executable(tungsten src/tungsten/tungsten.cpp)
 target_link_libraries(tungsten ${core_libs})
 
+set(tests 
+	mvn-test derivative-test realization-gen 
+	lod-gen microfacet-gen dft-realization-gen
+	intersection-test transmittance-test ray-view-realizations weight-space-test
+	phase-function-sampling bake-csg bin-to-vdb nspsr-test kernel-explorer)
+
+foreach (test IN LISTS tests)
+	add_executable(tungsten-${test} src/tungsten-test/${test}.cpp)
+	target_link_libraries(tungsten-${test} ${core_libs})
+	set_target_properties (tungsten-${test} PROPERTIES 
+		FOLDER tests
+		VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/data")
+endforeach ()
+
+
+
 if (WIN32)
     set(socket_libs wsock32 Ws2_32)
 else()
@@ -174,21 +240,28 @@ if (EIGEN3_FOUND)
 endif()
 set(data_dirs example-scenes materialtest mc-loader)
 
+
 find_package(OpenGL)
-find_package(Qt5Widgets)
-find_package(Qt5OpenGL)
-if (OPENGL_FOUND AND Qt5Widgets_FOUND)
+find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+option(BUILD_EDITOR "Build the editor" FALSE) 
+if (BUILD_EDITOR AND OPENGL_FOUND AND Qt5Widgets_FOUND)
+	set(CMAKE_AUTOMOC ON)
+	set(CMAKE_AUTORCC ON)
+	set(CMAKE_AUTOUIC ON)
+	set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
     include_directories(${OPENGL_INCLUDE_DIR})
     set(opengl_libs ${OPENGL_LIBRARIES})
-    
-    file(GLOB_RECURSE Editor_SOURCES "src/editor/*.cpp")
+	
+    file(GLOB_RECURSE Editor_SOURCES "src/editor/*.*pp")
     if (APPLE)
         list(APPEND Editor_SOURCES "src/editor/CoreProfileAttributes.mm")
     endif()
     add_executable(editor ${Editor_SOURCES} src/editor/resources/Tungsten.rc)
+
+
     set_target_properties(editor PROPERTIES AUTOMOC TRUE)
-    qt5_use_modules(editor Widgets OpenGL)
-    target_link_libraries(editor ${core_libs} ${opengl_libs} Qt5::Widgets Qt5::OpenGL)
+    target_link_libraries(editor ${core_libs} ${opengl_libs} Qt5::Core Qt5::Widgets Qt5::OpenGL)
     if (APPLE)
         find_library(APPKIT NAMES AppKit) 
         target_link_libraries(editor ${APPKIT})
@@ -204,6 +277,9 @@ else()
     if (NOT OPENGL_FOUND)
         message(STATUS "OpenGL not found. Editor will not be built")
     endif()
+	if (NOT BUILD_EDITOR)
+        message(STATUS "Editor build disabled. Editor will not be built")
+    endif()
 endif()
 
 if (WIN32)
@@ -213,11 +289,11 @@ else()
 endif()
 
 foreach (data_dir ${data_dirs})
-    install(DIRECTORY data/${data_dir} DESTINATION ${data_prefix})
-    file(GLOB_RECURSE data_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/data "data/${data_dir}/*")
-    foreach (data ${data_files})
-        configure_file(data/${data} ${CMAKE_CURRENT_BINARY_DIR}/${data_prefix}/${data} COPYONLY)
-    endforeach(data)
+   install(DIRECTORY data/${data_dir} DESTINATION ${data_prefix})
+   file(GLOB_RECURSE data_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/data "data/${data_dir}/*")
+   foreach (data ${data_files})
+       configure_file(data/${data} ${CMAKE_CURRENT_BINARY_DIR}/${data_prefix}/${data} COPYONLY)
+   endforeach(data)
 endforeach()
 
 if (WIN32)

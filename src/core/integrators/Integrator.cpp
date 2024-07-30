@@ -21,22 +21,6 @@
 
 namespace Tungsten {
 
-static Path incrementalFilename(const Path &dstFile, const std::string &suffix, bool overwrite)
-{
-    Path dstPath = (dstFile.stripExtension() + suffix) + dstFile.extension();
-    if (overwrite)
-        return std::move(dstPath);
-
-    Path barePath = dstPath.stripExtension();
-    Path extension = dstPath.extension();
-
-    int index = 0;
-    while (dstPath.exists())
-        dstPath = (barePath + tfm::format("%03d", ++index)) + extension;
-
-    return std::move(dstPath);
-}
-
 Integrator::Integrator()
 : _scene(nullptr),
   _currentSpp(0),

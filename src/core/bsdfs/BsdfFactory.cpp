@@ -22,6 +22,7 @@
 #include "MixedBsdf.hpp"
 #include "HairBcsdf.hpp"
 #include "NullBsdf.hpp"
+#include "NDFBsdf.hpp"
 #include "Bsdf.hpp"
 
 namespace Tungsten {
@@ -47,7 +48,8 @@ DEFINE_STRINGABLE_ENUM(BsdfFactory, "BSDF", ({
     {"lambertian_fiber", std::make_shared<LambertianFiberBcsdf>},
     {"rough_wire", std::make_shared<RoughWireBcsdf>},
     {"hair", std::make_shared<HairBcsdf>},
-    {"diffuse_transmission", std::make_shared<DiffuseTransmissionBsdf>}
+    {"diffuse_transmission", std::make_shared<DiffuseTransmissionBsdf>},
+    {"ndf", std::make_shared<NDFBsdf>}
 }))
 
 }

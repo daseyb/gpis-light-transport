@@ -30,7 +30,7 @@ public:
     {
         Ray ray(*this);
         ray._pos = newPos;
-        ray._dir = newDir;
+        ray._dir = newDir.normalized();
         ray._nearT = newNearT;
         ray._farT = newFarT;
         return ray;

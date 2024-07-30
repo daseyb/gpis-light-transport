@@ -165,6 +165,15 @@ public:
         );
     }
 
+    Vec3f transformPoint(const Vec3f& b) const
+    {
+        return Vec3f(
+            a11 * b.x() + a12 * b.y() + a13 * b.z() + a14,
+            a21 * b.x() + a22 * b.y() + a23 * b.z() + a24,
+            a31 * b.x() + a32 * b.y() + a33 * b.z() + a34
+        );
+    }
+
     Mat4f operator-(const Mat4f &o) const
     {
         Mat4f tmp(*this);

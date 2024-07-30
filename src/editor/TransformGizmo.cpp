@@ -343,7 +343,7 @@ void TransformGizmo::endTransform()
     _needsMouseDown = false;
     Mat4f delta = _deltaTransform;
     _deltaTransform = Mat4f();
-    emit transformFinished(delta);
+    Q_EMIT transformFinished(delta);
 }
 
 void TransformGizmo::abortTransform()

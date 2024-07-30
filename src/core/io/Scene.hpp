@@ -13,6 +13,8 @@
 #include "ImageIO.hpp"
 #include "Path.hpp"
 
+#include "transmittances/Transmittance.hpp"
+
 #include "phasefunctions/PhaseFunction.hpp"
 
 #include "integrators/Integrator.hpp"
@@ -32,6 +34,13 @@
 
 namespace Tungsten {
 
+    class GPSampleNode;
+    class CovarianceFunction;
+    class MeanFunction;
+    class GPNeuralNetwork;
+    class ProceduralScalar;
+    class ProceduralVector;
+
 class Scene : public JsonSerializable
 {
     Path _srcDir;
@@ -39,6 +48,7 @@ class Scene : public JsonSerializable
 
     std::vector<std::shared_ptr<Primitive>> _primitives;
     std::vector<std::shared_ptr<Medium>> _media;
+    std::vector<std::shared_ptr<Grid>> _grids;
     std::vector<std::shared_ptr<Bsdf>> _bsdfs;
     std::shared_ptr<TextureCache> _textureCache;
     std::shared_ptr<Camera> _camera;
@@ -66,11 +76,19 @@ public:
     virtual void loadResources() override;
     virtual void saveResources() override;
 
+    std::shared_ptr<Transmittance> fetchTransmittance(JsonPtr value) const;
     std::shared_ptr<PhaseFunction> fetchPhase(JsonPtr value) const;
     std::shared_ptr<Medium> fetchMedium(JsonPtr value) const;
     std::shared_ptr<Grid> fetchGrid(JsonPtr value) const;
+    std::shared_ptr<Primitive> fetchPrimitive(JsonPtr value) const;
     std::shared_ptr<Bsdf> fetchBsdf(JsonPtr value) const;
     std::shared_ptr<Texture> fetchTexture(JsonPtr value, TexelConversion conversion) const;
+    std::shared_ptr<MeanFunction> fetchMeanFunction(JsonPtr value) const;
+    std::shared_ptr<CovarianceFunction> fetchCovarianceFunction(JsonPtr value) const;
+    std::shared_ptr<GPSampleNode> fetchGaussianProcess(JsonPtr value) const;
+    std::shared_ptr<ProceduralScalar> fetchProceduralScalar(JsonPtr value) const;
+    std::shared_ptr<ProceduralVector> fetchProceduralVector(JsonPtr value) const;
+
     PathPtr fetchResource(const std::string &path) const;
     PathPtr fetchResource(JsonPtr v) const;
 
@@ -160,7 +178,7 @@ public:
         return _resources;
     }
 
-    static Scene *load(const Path &path, std::shared_ptr<TextureCache> cache = nullptr);
+    static Scene *load(const Path &path, std::shared_ptr<TextureCache> cache = nullptr, const Path *inputDirectory = nullptr);
     static void save(const Path &path, const Scene &scene);
 };
 

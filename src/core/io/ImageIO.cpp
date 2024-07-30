@@ -11,11 +11,14 @@
 #include <cstring>
 
 #if OPENEXR_AVAILABLE
-#include <ImfChannelList.h>
-#include <ImfOutputFile.h>
-#include <ImfInputFile.h>
-#include <ImfIO.h>
-#include <half.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfOutputFile.h>
+#include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfHeader.h>
+#include <OpenEXR/ImfIO.h>
+#include <OpenEXR/ImfFrameBuffer.h>
+#include <Imath/half.h>
+#include <Imath/ImathBox.h>
 #endif
 
 #if JPEG_AVAILABLE
@@ -67,12 +70,12 @@ public:
             throw std::runtime_error("ExrIStream::write failed");
     }
 
-    virtual Imf::Int64 tellp() override final
+    virtual uint64_t tellp() override final
     {
         return _out->tellp();
     }
 
-    virtual void seekp(Imf::Int64 pos) override final
+    virtual void seekp(uint64_t pos) override final
     {
         _out->seekp(pos, std::ios_base::beg);
     }
@@ -115,12 +118,12 @@ public:
         throw std::runtime_error("ExrIStream::readMemoryMapped should not be called");
     }
 
-    virtual Imf::Int64 tellg() override final
+    virtual uint64_t tellg() override final
     {
         return _offs;
     }
 
-    virtual void seekg(Imf::Int64 pos) override final
+    virtual void seekg(uint64_t pos) override final
     {
         _in->seekg(pos, std::ios_base::beg);
         _offs = pos;

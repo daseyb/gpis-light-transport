@@ -27,7 +27,7 @@ class PathProperty : public Property
     QPushButton *_choosePath;
     QLineEdit *_lineEdit;
 
-private slots:
+private Q_SLOTS:
     void textEdited();
     void openPath();
 

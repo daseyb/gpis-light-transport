@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
 
     bool _showPreview;
 
-private slots:
+private Q_SLOTS:
     void showPreview(bool v);
 
     void newScene();
@@ -42,11 +42,11 @@ private slots:
     void saveScene();
     void saveSceneAs();
 
-public slots:
+public Q_SLOTS:
     void togglePreview();
     void openScene(const QString &path);
 
-signals:
+Q_SIGNALS:
     void sceneChanged();
 
 public:

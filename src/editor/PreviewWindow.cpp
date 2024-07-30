@@ -271,7 +271,7 @@ void PreviewWindow::pickPrimitive()
     _selectionState = SelectionState();
     updateFixedTransform();
 
-    emit selectionChanged();
+    Q_EMIT selectionChanged();
 }
 
 bool PreviewWindow::handleSelection(QMouseEvent *event)
@@ -339,7 +339,7 @@ void PreviewWindow::toggleSelectAll()
     updateFixedTransform();
     update();
 
-    emit selectionChanged();
+    Q_EMIT selectionChanged();
 }
 
 void PreviewWindow::grabGizmo()
@@ -440,8 +440,8 @@ void PreviewWindow::duplicateSelection()
     updateFixedTransform();
     update();
 
-    emit selectionChanged();
-    emit primitiveListChanged();
+    Q_EMIT selectionChanged();
+    Q_EMIT primitiveListChanged();
 }
 
 void PreviewWindow::deleteSelection()
@@ -454,8 +454,8 @@ void PreviewWindow::deleteSelection()
     rebuildMeshMap();
     update();
 
-    emit selectionChanged();
-    emit primitiveListChanged();
+    Q_EMIT selectionChanged();
+    Q_EMIT primitiveListChanged();
 }
 
 void PreviewWindow::addModel()
@@ -513,8 +513,8 @@ void PreviewWindow::addModel()
         updateFixedTransform();
         update();
 
-        emit selectionChanged();
-        emit primitiveListChanged();
+        Q_EMIT selectionChanged();
+        Q_EMIT primitiveListChanged();
     }
 }
 

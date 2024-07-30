@@ -1,6 +1,8 @@
 #ifndef MEDIUM_HPP_
 #define MEDIUM_HPP_
 
+#include "transmittances/Transmittance.hpp"
+
 #include "phasefunctions/PhaseFunction.hpp"
 
 #include "samplerecords/MediumSample.hpp"
@@ -16,10 +18,14 @@
 namespace Tungsten {
 
 class Scene;
+struct GPContext {
+    virtual void reset() = 0;
+};
 
 class Medium : public JsonSerializable
 {
 protected:
+    std::shared_ptr<Transmittance> _transmittance;
     std::shared_ptr<PhaseFunction> _phaseFunction;
     int _maxBounce;
 
@@ -29,11 +35,18 @@ public:
         bool firstScatter;
         int component;
         int bounce;
+        int lastGPId;
+        Vec3d lastAniso;
+        std::shared_ptr<GPContext> gpContext;
 
         void reset()
         {
             firstScatter = true;
             bounce = 0;
+            if (gpContext) {
+                gpContext->reset();
+            }
+            lastGPId = 0;
         }
 
         void advance()
@@ -60,11 +73,14 @@ public:
     virtual bool sampleDistance(PathSampleGenerator &sampler, const Ray &ray,
             MediumState &state, MediumSample &sample) const = 0;
     virtual bool invertDistance(WritablePathSampleGenerator &sampler, const Ray &ray, bool onSurface) const;
-    virtual Vec3f transmittance(PathSampleGenerator &sampler, const Ray &ray) const = 0;
-    virtual float pdf(PathSampleGenerator &sampler, const Ray &ray, bool onSurface) const = 0;
+    virtual Vec3f transmittance(PathSampleGenerator &sampler, const Ray &ray, bool startOnSurface,
+            bool endOnSurface, MediumSample* sample) const = 0;
+    virtual float pdf(PathSampleGenerator &sampler, const Ray &ray, bool startOnSurface, bool endOnSurface) const = 0;
     virtual Vec3f transmittanceAndPdfs(PathSampleGenerator &sampler, const Ray &ray, bool startOnSurface,
-            bool endOnSurface, float &pdfForward, float &pdfBackward) const;
+            bool endOnSurface, MediumSample* sample, float &pdfForward, float &pdfBackward) const;
     virtual const PhaseFunction *phaseFunction(const Vec3f &p) const;
+
+    bool isDirac() const;
 };
 
 }

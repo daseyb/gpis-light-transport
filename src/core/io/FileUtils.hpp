@@ -23,6 +23,8 @@ class Path;
 typedef std::shared_ptr<std::istream> InputStreamHandle;
 typedef std::shared_ptr<std::ostream> OutputStreamHandle;
 
+Path incrementalFilename(const Path& dstFile, const std::string& suffix, bool overwrite);
+
 class OpenDir
 {
 protected:

@@ -1,0 +1,225 @@
+{
+    "media": [
+		{
+            "name": "gp",
+            "phase_function": {
+                "type": "brdf",
+				"bsdf": {
+					"albedo": [0.35, 0.3, 0.9],
+					"type": "mirror"
+				}
+            },
+			"additional_phase_functions": [{
+                "type": "brdf",
+				"bsdf": {
+					"albedo": [0.35, 0.3, 0.9],
+					"type": "mirror"
+				}
+            }],
+            "max_bounces": 1024,
+            "type": "gaussian_process",
+            "sigma_a": 0.0,
+            "sigma_s": 1.0,
+            "density": 1,
+            "sample_points": 8,
+			"step_size_cov": 0.9,
+			"intersect_method": "gp_discrete",
+			"normal_method": "conditioned_gaussian",
+			"gaussian_process": {
+				"id": 0,
+				"type": "standard",
+				"covariance_epsilon": 0,
+				"mean": {
+					"type": "tabulated",
+					"grid": {
+						"type": "vdb",
+						"file": "csg-two-spheres-eval-avg-32.vdb",
+						"density_name": "mean",
+						"normalize_size": false,
+						"integration_method": "raymarching"
+					}
+				},
+				"covariance": {
+					"type": "nonstationary",
+					"cov": {
+						"type": "squared_exponential",
+						"lengthScale": 0.5,
+						"sigma": 1
+					},
+					"grid": {
+						"type": "vdb",
+						"file": "csg-two-spheres-eval-avg-32.vdb",
+						"density_name": "variance",
+						"normalize_size": false,
+						"integration_method": "raymarching"
+					}
+				}
+			}
+        }
+    ],
+    "bsdfs": [
+        {
+            "name": "backWall",
+            "albedo": {
+				"type": "checker"
+			},
+            "type": "lambert"
+        },
+        {
+            "name": "light",
+            "albedo": 1,
+            "type": "null"
+        },
+        {
+            "name": "floor",
+            "albedo": 1,
+            "type": "null"
+        },
+        {
+            "name": "upper",
+            "albedo": 1,
+            "type": "forward"
+        }
+    ],
+    "primitives": [
+	    {
+            "name": "floor",
+            "transform": {
+				"position": [ 0, 0, 0],
+                "scale": [
+                    30,
+                    30,
+                    30
+                ],
+                "rotation": [
+                    0,
+                    90,
+                    0
+                ]
+            },
+            "type": "quad",
+            "bsdf": "backWall"
+        },
+        {
+            "name": "processBox",
+            "transform": {
+                "position": [
+                    0,
+                    1.001,
+                    0
+                ],
+                "scale": [
+                    3,
+                    3,
+                    3
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "type": "cube",
+            "bsdf": "upper",
+			"int_medium": "gp"
+        },
+		{
+            "transform": {
+                "rotation": [
+                    -32.512420654296878,
+                    -78.93219757080078,
+                    34.01728439331055
+                ]
+            },
+            "power": 7.5,
+            "type": "infinite_sphere_cap",
+            "sample": true,
+            "cap_angle": 0.1
+        },
+		{
+            "transform": {
+                "rotation": [
+                    -32.512420654296878,
+                    160.0,
+                    34.0
+                ]
+            },
+            "power": [4.5, 4.5, 3.5],
+            "type": "infinite_sphere_cap",
+            "sample": true,
+            "cap_angle": 50
+        },
+		{
+            "bump_strength": 1,
+            "transform": {
+                "position": [
+                    0,
+                    0,
+                    1.17369
+                ],
+                "rotation": [
+                    0,
+                    -67.2614,
+                    0
+                ]
+            },
+            "emission": "FlowCheck.hdr",
+            "type": "infinite_sphere",
+            "sample": true,
+            "bsdf": {
+                "albedo": 1,
+                "type": "null"
+            }
+        }
+    ],
+    "camera": {
+        "tonemap": "filmic",
+        "resolution": [
+            512,
+            512
+        ],
+        "reconstruction_filter": "tent",
+        "transform": {
+            "position": [
+                2,
+                3,
+                7
+            ],
+            "look_at": [
+                0,
+                0.6,
+                0
+            ],
+            "up": [
+                0,
+                1,
+                0
+            ]
+        },
+        "type": "pinhole",
+        "fov": 20
+    },
+    "integrator": {
+        "type": "path_tracer",
+        "min_bounces": 0,
+        "max_bounces": 20,
+        "enable_consistency_checks": false,
+        "enable_two_sided_shading": true,
+        "enable_light_sampling": true,
+        "enable_volume_light_sampling": true
+    },
+    "renderer": {
+        "output_file": "baked.png",
+        "hdr_output_file": "baked.exr",
+        "resume_render_file": "",
+        "overwrite_output_files": false,
+        "adaptive_sampling": false,
+        "enable_resume_render": false,
+        "stratified_sampler": false,
+        "scene_bvh": true,
+        "spp": 1,
+        "spp_step": 1,
+        "checkpoint_interval": "0",
+        "timeout": "0"
+    }
+}

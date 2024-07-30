@@ -1,0 +1,178 @@
+{
+    "media": [
+        {
+            "name": "gp",
+            "phase_function": {
+                "type": "brdf",
+				"bsdf": {
+					"name": "rough_metal",
+					"albedo": 1,
+					"type": "rough_conductor",
+					"material": "Cu",
+					"distribution": "beckmann",
+					"roughness": 0.001
+				}
+            },
+            "max_bounces": 1024,
+            "type": "gaussian_process",
+            "sigma_a": 0.0,
+            "sigma_s": 1.0,
+            "density": 1,
+            "sample_points": 32,
+			"gaussian_process": {
+				"type": "standard",
+				"mean": {
+					"type": "linear",
+					"reference_point": [0,1,0],
+					"direction": [0,1,0],
+					"scale": 1
+				},
+				"covariance": {
+					"type": "squared_exponential",
+					"lengthScale": 10.0,
+					"sigma": 0.2,
+					"aniso": [1, 1, 1]
+				}
+			}
+        }
+    ],
+    "bsdfs": [
+        {
+            "name": "backWall",
+            "albedo": {
+				"type": "checker",
+			},
+            "type": "lambert"
+        },
+		{
+            "name": "wedge",
+            "albedo": 1.0,
+            "type": "forward"
+        },
+        {
+            "name": "light",
+            "albedo": 1,
+            "type": "null"
+        }
+    ],
+    "primitives": [
+        {
+            "name": "backWall",
+            "transform": {
+                "position": [
+                    0,
+                    1,
+                    -1
+                ],
+                "scale": [
+                    2,
+                    4,
+                    2
+                ],
+                "rotation": [
+                    0,
+                    90,
+                    90
+                ]
+            },
+            "type": "quad",
+            "bsdf": "backWall"
+        },
+		{
+            "name": "wedge",
+            "transform": {
+                "position": [
+                    0,
+                    1.0,
+                    -0.49
+                ],
+                "scale": 0.5
+            },
+            "bump_strength": 1,
+            "type": "mesh",
+            "file": "wedge.obj",
+            "smooth": false,
+            "backface_culling": false,
+            "recompute_normals": true,
+            "bsdf": "wedge",
+			"int_medium": "gp"
+        },
+        {
+            "name": "light",
+            "transform": {
+                "position": [
+                    0,
+                    1.98,
+                    0
+                ],
+                "scale": [
+                    0.005,
+                    1,
+                    0.005
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    180
+                ]
+            },
+            "power": [
+                34,
+                24,
+                8
+            ],
+            "type": "quad",
+            "bsdf": "light"
+        }
+    ],
+    "camera": {
+        "tonemap": "filmic",
+        "resolution": [
+            512,
+            512
+        ],
+        "reconstruction_filter": "tent",
+        "transform": {
+            "position": [
+                1,
+                4,
+                7
+            ],
+            "look_at": [
+                0,
+                1,
+                0
+            ],
+            "up": [
+                0,
+                1,
+                0
+            ]
+        },
+        "type": "pinhole",
+        "fov": 25
+    },
+    "integrator": {
+        "type": "path_tracer",
+        "min_bounces": 0,
+        "max_bounces": 64,
+        "enable_consistency_checks": false,
+        "enable_two_sided_shading": true,
+        "enable_light_sampling": true,
+        "enable_volume_light_sampling": true
+    },
+    "renderer": {
+        "output_file": "gp-medium-wedge-aniso.png",
+        "hdr_output_file": "gp-medium-wedge-aniso.exr",
+        "resume_render_file": "",
+        "overwrite_output_files": false,
+        "adaptive_sampling": false,
+        "enable_resume_render": false,
+        "stratified_sampler": false,
+        "scene_bvh": true,
+        "spp": 8,
+        "spp_step": 1,
+        "checkpoint_interval": "0",
+        "timeout": "0"
+    }
+}

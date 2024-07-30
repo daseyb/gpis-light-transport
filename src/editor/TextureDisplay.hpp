@@ -21,7 +21,7 @@ class TextureDisplay : public QLabel
 public:
     TextureDisplay(int w, int h, QWidget *parent = nullptr);
 
-public slots:
+public Q_SLOTS:
     void changeTexture(Texture *tex);
 };
 

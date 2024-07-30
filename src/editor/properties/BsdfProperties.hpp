@@ -23,7 +23,7 @@ class BsdfProperties : public QWidget
 public:
     BsdfProperties(QWidget *proxyParent, Scene *scene, std::unordered_set<Primitive *> &selection);
 
-signals:
+Q_SIGNALS:
     void bsdfNameChange(Primitive *p);
     void triggerRedraw();
 };

@@ -141,7 +141,7 @@ void RenderWindow::startRender()
     }
 
     auto finishCallback = [&]() {
-        emit rendererFinished();
+        Q_EMIT rendererFinished();
     };
 
     _rendering = true;

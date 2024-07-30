@@ -414,6 +414,9 @@ Path FileUtils::getDataPath()
     Path execPath = getExecutablePath().parent()/"data";
     if (execPath.exists())
         return std::move(execPath);
+    execPath = getExecutablePath().parent().parent().parent() / "data";
+    if (execPath.exists())
+        return std::move(execPath);
     return Path(INSTALL_PREFIX)/"data";
 #else
     Path execPath = getExecutablePath().parent()/"share/tungsten";
@@ -664,4 +667,19 @@ bool FileUtils::isFile(const Path &p)
     return info.isFile;
 }
 
+Path incrementalFilename(const Path& dstFile, const std::string& suffix, bool overwrite)
+{
+    Path dstPath = (dstFile.stripExtension() + suffix) + dstFile.extension();
+    if (overwrite)
+        return std::move(dstPath);
+
+    Path barePath = dstPath.stripExtension();
+    Path extension = dstPath.extension();
+
+    int index = 0;
+    while (dstPath.exists())
+        dstPath = (barePath + tfm::format("%03d", ++index)) + extension;
+
+    return std::move(dstPath);
+}
 }

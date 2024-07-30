@@ -2,10 +2,12 @@
 #define MEDIUMSAMPLE_HPP_
 
 #include "math/Vec.hpp"
+#include <Eigen/Dense>
 
 namespace Tungsten {
 
 class PhaseFunction;
+struct GPContext;
 
 struct MediumSample
 {
@@ -15,8 +17,13 @@ struct MediumSample
     Vec3f continuedWeight;
     float t;
     Vec3f weight;
+    Vec3f emission;
     float pdf;
     bool exited;
+    Vec3d aniso;
+    int gpId;
+
+    GPContext* ctxt;
 };
 
 }
