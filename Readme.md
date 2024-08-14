@@ -4,7 +4,7 @@
 
 ## About ##
 
-This is the code for our [2024 SIGGRAPH paper](https://cs.dartmouth.edu/~wjarosz/publications/seyb24from.html). It is based on the [Tungsten renderer](https://github.com/tunabrain/tungsten) and we defer to the Tungsten for general documentation.
+This is the code for our [2024 SIGGRAPH paper](https://cs.dartmouth.edu/~wjarosz/publications/seyb24from.html). It is based on the [Tungsten renderer](https://github.com/tunabrain/tungsten) and we defer to Tungsten for general documentation.
 
 A Gaussian process implicit surface is implemented as a new medium type, which allows for free-flight distance sampling. We use a track length estimator to compute transmittance.
 To account for "surface-like reflectance" at what are technically medium scattering events, we implement a new phase function that defers to a BSDF instance for scattering computations.
