@@ -1,3 +1,5 @@
+#ifdef FFTW_AVAILABLE
+
 #include <core/math/GaussianProcess.hpp>
 #include <core/sampling/UniformPathSampler.hpp>
 #include <core/math/Ray.hpp>
@@ -254,9 +256,11 @@ void rational_quadratic_sphere_3D() {
 
     fftw_destroy_plan(plan);
 }
+#endif
 
 
 int main() {
+    #if FFTW_AVAILABLE
     try {
         GaussianProcess gp(std::make_shared<HomogeneousMean>(), std::make_shared<SquaredExponentialCovariance>(1.0f, 0.25f, Vec3f(1.f, 1.f, 1.f)));
         real_2D(gp);
@@ -264,123 +268,5 @@ int main() {
     catch (std::exception& e) {
         std::cerr << e.what();
     }
+    #endif
 }
-
-
-
-#if 0
-
-GaussianProcess gp(std::make_shared<SphericalMean>(Vec3f(0.f, 0.f, 0.f), 0.25f), std::make_shared<RationalQuadraticCovariance>(1.0f, 0.1f, 0.25f, Vec3f(1.f, 1.0f, 1.f)));
-
-UniformPathSampler sampler(0);
-sampler.next2D();
-
-
-std::vector<Vec3f> points(NUM_SAMPLE_POINTS* NUM_SAMPLE_POINTS);
-std::vector<Derivative> derivs(points.size());
-
-std::vector<std::complex<double>> cov(points.size());
-std::vector<std::complex<double>> Fcov(points.size());
-fftw_plan plan = fftw_plan_dft_2d(NUM_SAMPLE_POINTS, NUM_SAMPLE_POINTS, (fftw_complex*)cov.data(), (fftw_complex*)Fcov.data(), FFTW_FORWARD, FFTW_ESTIMATE);
-
-int idx = 0;
-for (int i = 0; i < NUM_SAMPLE_POINTS; i++) {
-    for (int j = 0; j < NUM_SAMPLE_POINTS; j++) {
-        points[idx] = 2.f * (Vec3f((float)i, (float)j, 0.f) / (NUM_SAMPLE_POINTS - 1) - 0.5f);
-        points[idx][2] = 0.f;
-
-        derivs[idx] = Derivative::None;
-        cov[idx] = std::complex<double>((*gp._cov)(Derivative::None, Derivative::None, Vec3f(0.f), points[idx], points[idx].normalized()), 0.f);
-        idx++;
-    }
-}
-
-
-fftw_execute(plan);
-
-fftw_destroy_plan(plan);
-
-std::vector<std::complex<double>> Fcov_sample(points.size());
-std::vector<std::complex<double>> real(points.size());
-plan = fftw_plan_dft_2d(NUM_SAMPLE_POINTS, NUM_SAMPLE_POINTS, (fftw_complex*)Fcov_sample.data(), (fftw_complex*)real.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-
-idx = 0;
-for (int i = 0; i < Fcov.size(); i++) {
-    Vec2f u = gp.rand_normal_2(sampler);
-    Fcov_sample[idx] = sqrt(Fcov[idx] / std::complex<double>(cov.size(), 0.f)) * (std::complex<double>(u.x(), u.y()));
-    idx++;
-}
-
-
-std::vector<double> real_pteval(NUM_PT_EVAL_POINTS * NUM_PT_EVAL_POINTS);
-idx = 0;
-for (int i = 0; i < NUM_PT_EVAL_POINTS; i++) {
-    for (int j = 0; j < NUM_PT_EVAL_POINTS; j++) {
-        Vec3f p = 2.f * (Vec3f((float)i, (float)j, 0.f) / (NUM_PT_EVAL_POINTS - 1) - 0.5f);
-        p[2] = 0.f;
-
-        p = p * 0.5f + 0.5f;
-
-        real_pteval[idx] = eval_idft_point(p, Fcov_sample);
-        idx++;
-    }
-}
-
-fftw_execute(plan);
-fftw_destroy_plan(plan);
-
-{
-    std::ofstream xfile("fftw-input.bin", std::ios::out | std::ios::binary);
-    xfile.write((char*)cov.data(), sizeof(fftw_complex) * cov.size());
-    xfile.close();
-}
-
-{
-    std::ofstream xfile("fftw-result.bin", std::ios::out | std::ios::binary);
-    xfile.write((char*)Fcov.data(), sizeof(fftw_complex) * Fcov.size());
-    xfile.close();
-}
-
-{
-    std::ofstream xfile("fftw-transform.bin", std::ios::out | std::ios::binary);
-    xfile.write((char*)Fcov_sample.data(), sizeof(fftw_complex) * Fcov_sample.size());
-    xfile.close();
-}
-
-{
-    std::ofstream xfile("fftw-sample.bin", std::ios::out | std::ios::binary);
-    xfile.write((char*)real.data(), sizeof(fftw_complex) * real.size());
-    xfile.close();
-}
-
-{
-    std::ofstream xfile("fftw-sample-pteval.bin", std::ios::out | std::ios::binary);
-    xfile.write((char*)real_pteval.data(), sizeof(double) * real_pteval.size());
-    xfile.close();
-}
-
-
-{
-    int idx = 0;
-    for (int i = 0; i < NUM_SAMPLE_POINTS; i++) {
-        for (int j = 0; j < NUM_SAMPLE_POINTS; j++) {
-            for (int k = 0; k < NUM_SAMPLE_POINTS; k++) {
-                points[idx] = 2.f * (Vec3f((float)i, (float)j, (float)k) / (NUM_SAMPLE_POINTS - 1) - 0.5f);
-                derivs[idx] = Derivative::None;
-                idx++;
-            }
-        }
-    }
-
-    Eigen::MatrixXf samples = gp.sample(
-        points.data(), derivs.data(), points.size(),
-        nullptr, 0,
-        Vec3f(1.0f, 0.0f, 0.0f), 1, sampler);
-
-    {
-        std::ofstream xfile("grid-samples.bin", std::ios::out | std::ios::binary);
-        xfile.write((char*)samples.data(), sizeof(float) * samples.rows() * samples.cols());
-        xfile.close();
-    }
-}
-#endif

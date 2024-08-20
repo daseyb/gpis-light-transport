@@ -1,3 +1,5 @@
+#ifdef FFTW_AVAILABLE
+
 #include <core/math/GaussianProcess.hpp>
 #include <core/media/GaussianProcessMedium.hpp>
 #include <core/sampling/UniformPathSampler.hpp>
@@ -1472,9 +1474,11 @@ int inspect_acf_gp(int argc, char** argv) {
 
     return 0;
 }
+#endif
 
 
 int main(int argc, char** argv) {
+    #if FFTW_AVAILABLE
     //return mesh_convert_2d(argc, argv);
     return mesh_convert(argc, argv);
     //return gen3d(argc, argv);
@@ -1483,4 +1487,5 @@ int main(int argc, char** argv) {
     //return estimate_acf(argc, argv);
     //estimate_acf_mesh(argc, argv);
     //return inspect_acf_gp(argc, argv);
+    #endif
 }

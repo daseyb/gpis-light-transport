@@ -10,11 +10,13 @@
 #include <stbi/stb_image.h>
 #include <cstring>
 
+#undef OPENEXR_AVAILABLE
+
 #if OPENEXR_AVAILABLE
 #include <OpenEXR/ImfChannelList.h>
 #include <OpenEXR/ImfOutputFile.h>
 #include <OpenEXR/ImfInputFile.h>
-#include <OpenEXR/ImfHeader.h>
+//#include <OpenEXR/ImfHeader.h>
 #include <OpenEXR/ImfIO.h>
 #include <OpenEXR/ImfFrameBuffer.h>
 #include <Imath/half.h>

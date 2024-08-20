@@ -9,7 +9,6 @@
 #include <io/Scene.hpp>
 #include <math/WeightSpaceGaussianProcess.hpp>
 #include <ccomplex>
-#include <fftw3.h>
 
 #ifdef OPENVDB_AVAILABLE
 #include <openvdb/openvdb.h>
@@ -634,7 +633,7 @@ void gen__ws_limited_reals() {
 
         UniformPathSampler sampler(0);
         sampler.next2D();
-        const WeightSpaceRealization ws = WeightSpaceBasis::sample(gp->_cov, 10000, sampler, false).sampleRealization(gp, sampler);
+        const WeightSpaceRealization ws = WeightSpaceBasis::sample(gp->_cov, 10000, sampler, Vec3d(0.), false).sampleRealization(gp, sampler);
 
         for(int n : {10,100,1000,10000})
         {
@@ -949,6 +948,9 @@ void gen__fs_algo_vis() {
 
 }
 
+#if FFTW_AVAILABLE
+#include <fftw3.h>
+
 void gen__spectral_density_est() {
 
     auto cov = SquaredExponentialCovariance(1.0f, .25f);
@@ -1004,8 +1006,9 @@ void gen__spectral_density_est() {
         xfile.write((char*)specValues.data(), sizeof(specValues[0]) * specValues.size());
         xfile.close();
     }
-
 }
+
+#endif
 
 int main(int argc, const char** argv) {
     //gen__mem_model_fig_reals();

@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "openexr",
+    "openvdb",
+    "tbb",
+    "boost-math"
+  ]
+}

@@ -19,7 +19,6 @@
 #include <igl/signed_distance.h>
 
 #include <ccomplex>
-#include <fftw3.h>
 #include <random>
 
 namespace Tungsten {

@@ -150,47 +150,11 @@ int gen3d(int argc, char** argv) {
             file.write(grids);
             file.close();
         }
-
-        /* {
-            openvdb::GridPtrVec grids;
-            grids.push_back(varGrid);
-            openvdb::io::File file(tinyformat::format("./testing/bake-csg/%s-var-eval-avg-%d.vdb", prefix, NUM_SAMPLE_POINTS));
-            file.write(grids);
-            file.close();
-        }*/
     }
 
-    /*{
-        Eigen::VectorXf gradx = gp->mean(points.data(), fderivs.data(), nullptr, Vec3f(1.0f, 0.0f, 0.0f), points.size());
-        std::ofstream xfile("./data/testing/load-gen/mean-dx-eval.bin", std::ios::out | std::ios::binary);
-        xfile.write((char*)gradx.data(), sizeof(float) * gradx.rows() * gradx.cols());
-        xfile.close();
-    }
-    {
-        Eigen::VectorXf grady = gp->mean(points.data(), fderivs.data(), nullptr, Vec3f(0.0f, 1.0f, 0.0f), points.size());
-        std::ofstream xfile("./data/testing/load-gen/mean-dy-eval.bin", std::ios::out | std::ios::binary);
-        xfile.write((char*)grady.data(), sizeof(float) * grady.rows() * grady.cols());
-        xfile.close();
-    }
-    {
-        Eigen::VectorXf gradz = gp->mean(points.data(), fderivs.data(), nullptr, Vec3f(0.0f, 0.0f, 1.0f), points.size());
-        std::ofstream xfile("./data/testing/load-gen/mean-dz-eval.bin", std::ios::out | std::ios::binary);
-        xfile.write((char*)gradz.data(), sizeof(float) * gradz.rows() * gradz.cols());
-        xfile.close();
-    }*/
-
-
-    return 0;
-
-}
-
-int test2d(int argc, char** argv) {
     return 0;
 }
 
 int main(int argc, char** argv) {
-
     return gen3d(argc, argv);
-    //return test2d(argc, argv);
-
 }

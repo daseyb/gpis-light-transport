@@ -104,7 +104,9 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_WARNINGS} -fvisibility-inlines-hidden")
 endif()
 
-set(core_libs core thirdparty embree Eigen3::Eigen autodiff::autodiff Spectra igl::core)
+find_package(Boost REQUIRED COMPONENTS math)
+
+set(core_libs core thirdparty embree Eigen3::Eigen autodiff::autodiff Spectra igl::core Boost::math)
 
 include_directories(
 	src/core src/thirdparty 
@@ -116,8 +118,8 @@ include_directories(
 	src/thirdparty/facet-forge/include
 	${FCPW_EIGEN_INCLUDES})
 
-find_package(Imath CONFIG REQUIRED)
-find_package(OpenEXR CONFIG REQUIRED)
+find_package(Imath)
+find_package(OpenEXR)
 if (OpenEXR_FOUND AND Imath_FOUND)
     message(STATUS "OpenEXR detected. Building with .exr support")
     add_definitions(-DOPENEXR_AVAILABLE -DIMATH_HALF_NO_LOOKUP_TABLE)
@@ -146,7 +148,7 @@ else()
 endif()
 
 find_package(TBB REQUIRED)
-find_package(OpenVDB REQUIRED)
+find_package(OpenVDB)
 if (OpenVDB_FOUND AND OpenEXR_FOUND AND TBB_FOUND)
     message(STATUS "OpenVDB detected. Building with .vdb support")
     add_definitions(-DOPENVDB_AVAILABLE)
@@ -210,9 +212,9 @@ add_executable(tungsten src/tungsten/tungsten.cpp)
 target_link_libraries(tungsten ${core_libs})
 
 set(tests 
-	mvn-test derivative-test realization-gen 
+	derivative-test realization-gen 
 	lod-gen microfacet-gen dft-realization-gen
-	intersection-test transmittance-test ray-view-realizations weight-space-test
+	intersection-test transmittance-test weight-space-test
 	phase-function-sampling bake-csg bin-to-vdb nspsr-test kernel-explorer)
 
 foreach (test IN LISTS tests)
@@ -242,7 +244,7 @@ set(data_dirs example-scenes materialtest mc-loader)
 
 
 find_package(OpenGL)
-find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets OpenGL)
 option(BUILD_EDITOR "Build the editor" FALSE) 
 if (BUILD_EDITOR AND OPENGL_FOUND AND Qt5Widgets_FOUND)
 	set(CMAKE_AUTOMOC ON)
