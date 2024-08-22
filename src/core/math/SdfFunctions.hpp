@@ -49,6 +49,7 @@ namespace Tungsten {
 			case Function::KnobInner: return knob_inner(p, mat);
 			case Function::KnobOuter: return knob_outer(p, mat);
 			case Function::TwoSpheres: return two_spheres(p, mat);
+			default: return 0.f;
 			}
 		}
 
@@ -58,6 +59,7 @@ namespace Tungsten {
 			case Function::KnobInner: return grad(knob_inner, p);
 			case Function::KnobOuter: return grad(knob_outer, p);
 			case Function::TwoSpheres: return grad(two_spheres, p);
+			default: return Vec3f(0.f);
 			}
 		}
 

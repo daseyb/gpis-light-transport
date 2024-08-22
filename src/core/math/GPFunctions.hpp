@@ -403,6 +403,8 @@ namespace Tungsten {
                 getValues(coord, data);
                 return triquadraticInterpolation(uvw, data);
             }
+            default:
+                return ElemType(0.f);
             }
         }
 
@@ -693,6 +695,8 @@ namespace Tungsten {
             case NoiseType::LeftRight: return "left_right";
             case NoiseType::Sandstone: return "sandstone";
             case NoiseType::Rust: return "rust";
+            default:
+                FAIL("Invalid noise type function: '%d'", (int)v);
             }
         }
 
@@ -708,7 +712,7 @@ namespace Tungsten {
             else if (v == "rust")
                 return NoiseType::Rust;
 
-            FAIL("Invalid noise typ function: '%s'", v);
+            FAIL("Invalid noise type function: '%s'", v);
         }
 
     public:

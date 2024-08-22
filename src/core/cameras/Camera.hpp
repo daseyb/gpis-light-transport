@@ -217,7 +217,7 @@ public:
         return _res;
     }
 
-    const Box2u& rect() const
+    Box2u rect() const
     {
         auto res = _rect;
         res.intersect(Box2u({ 0,0 }, _res));
